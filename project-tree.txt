@@ -1,0 +1,21 @@
+.
+├── README.md
+├── app
+│   ├── app.vue
+│   ├── lib
+│   │   ├── http.client.ts
+│   │   └── logger.ts
+│   └── types
+│       ├── api-response.ts
+│       ├── app-errors.ts
+│       └── app.ts
+├── nuxt.config.ts
+├── package.json
+├── pnpm-lock.yaml
+├── project-tree.txt
+├── public
+│   ├── favicon.ico
+│   └── robots.txt
+└── tsconfig.json
+
+5 directories, 14 files
