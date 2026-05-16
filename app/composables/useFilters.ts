@@ -5,12 +5,14 @@ export function useFilters(debounceDelay: number = 550) {
   const route = useRoute();
   const router = useRouter();
 
+  const { DEFAULT_PAGE, DEFAULT_PAGE_SIZE } = PAGINATION_CONFIG;
+
   const q = ref(fromQuery(route.query.q, isValidString, ''));
   const qDebounced = refDebounced(q, debounceDelay);
   const sortOrder = ref(fromQuery(route.query.sortOrder, isValidSortOrder, 'DESC'));
 
-  const page = Number(route.query.page) || PAGINATION_CONFIG.DEFAULT_PAGE;
-  const perPage = Number(route.query.perPage) || PAGINATION_CONFIG.DEFAULT_PAGE_SIZE;
+  const page = Number(route.query.page) || DEFAULT_PAGE;
+  const perPage = Number(route.query.perPage) || DEFAULT_PAGE_SIZE;
 
   const { pagination, firstPage, prevPage, nextPage, latestPage, btnPage, setPages } =
     usePagination(perPage, page);
@@ -22,8 +24,8 @@ export function useFilters(debounceDelay: number = 550) {
       q: isValidString(qDebounced.value) ? qDebounced.value.trim() : undefined,
       sortOrder: sortOrder.value === 'ASC' ? 'ASC' : undefined,
       categoryId: categoryid.value ?? undefined,
-      perPage: pagination.perPage,
-      page: pagination.page,
+      perPage: DEFAULT_PAGE_SIZE === pagination.perPage ? undefined : pagination.perPage,
+      page: DEFAULT_PAGE === pagination.page ? undefined : pagination.page,
     };
   });
 
