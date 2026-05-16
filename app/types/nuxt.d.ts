@@ -10,4 +10,13 @@ declare module '#app' {
   }
 }
 
+declare module 'vue' {
+  interface ComponentCustomProperties {
+    $httpClient: HTTPClient;
+    $api: {
+      product: ProductApplication;
+    };
+  }
+}
+
 export {};
