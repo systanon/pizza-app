@@ -2,7 +2,7 @@
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
-  modules: ['@pinia/nuxt'],
+  modules: ['@pinia/nuxt', 'vuetify-nuxt-module', '@vueuse/nuxt'],
   runtimeConfig: {
     apiInternal: process.env.GO_BACKEND_INTERNAL,
     public: {
@@ -13,5 +13,14 @@ export default defineNuxtConfig({
 
   routeRules: {
     '/api/**': process.env.GO_BACKEND_URL ? { proxy: `${process.env.GO_BACKEND_URL}/**` } : {},
+  },
+
+  vuetify: {
+    moduleOptions: {},
+    vuetifyOptions: {
+      theme: {
+        defaultTheme: 'light',
+      },
+    },
   },
 });
