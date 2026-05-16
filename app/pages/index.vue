@@ -5,11 +5,12 @@
   </div>
 </template>
 <script lang="ts" setup>
+  import { useCategories } from '~/composables/useCategories';
   import { AppSuccess } from '~/types/app';
   import type { Product } from '~/types/product';
-
+  const { data: categories } = useCategories();
   const {
-    $api: { product },
+    $app: { product },
   } = useNuxtApp();
 
   const { data } = await useAsyncData('products', async () => {

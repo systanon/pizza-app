@@ -4,8 +4,9 @@ import type { HTTPClient } from '~/lib/http.client';
 declare module '#app' {
   interface NuxtApp {
     $httpClient: HTTPClient;
-    $api: {
+    $app: {
       product: ProductApplication;
+      category: CategoryApplication;
     };
   }
 }
@@ -13,8 +14,9 @@ declare module '#app' {
 declare module 'vue' {
   interface ComponentCustomProperties {
     $httpClient: HTTPClient;
-    $api: {
+    $app: {
       product: ProductApplication;
+      category: CategoryApplication;
     };
   }
 }

@@ -1,10 +1,13 @@
 import { ProductService } from '~/service/product.service';
 import { ProductApplication } from '~/application/product.application';
+import { CategoryService } from '~/service/category.service';
+import { CategoryApplication } from '~/application/category.application';
 
 type ApiProvide = {
   provide: {
-    api: {
+    app: {
       product: ProductApplication;
+      category: CategoryApplication;
     };
   };
 };
@@ -15,11 +18,15 @@ export default defineNuxtPlugin({
 
     const productService = new ProductService($httpClient);
     const productApplication = new ProductApplication(productService);
+    const categoryService = new CategoryService($httpClient);
+
+    const categotyApplication = new CategoryApplication(categoryService);
 
     return {
       provide: {
-        api: {
+        app: {
           product: productApplication,
+          category: categotyApplication,
         },
       },
     };
