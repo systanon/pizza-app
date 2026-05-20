@@ -1,4 +1,5 @@
 import type { LocationQueryRaw } from 'vue-router';
+import z from 'zod';
 import { PAGINATION_CONFIG } from '~/constants';
 
 export function useFilters(debounceDelay: number = 550) {
@@ -7,39 +8,33 @@ export function useFilters(debounceDelay: number = 550) {
 
   const { DEFAULT_PAGE, DEFAULT_PAGE_SIZE } = PAGINATION_CONFIG;
 
-  const q = ref(fromQuery(route.query.q, isValidString, ''));
-  const qDebounced = refDebounced(q, debounceDelay);
-  const sortOrder = ref(fromQuery(route.query.sortOrder, isValidSortOrder, 'DESC'));
-
-  const page = Number(route.query.page) || DEFAULT_PAGE;
-  const perPage = Number(route.query.perPage) || DEFAULT_PAGE_SIZE;
-
-  const { pagination, firstPage, prevPage, nextPage, latestPage, btnPage, setPages } =
-    usePagination(perPage, page);
-
-  const categoryid = ref(route.query.categoryId ? Number(route.query.categoryId) : null);
-
-  const requestFiltersParams = computed<LocationQueryRaw>(() => {
-    return {
-      q: isValidString(qDebounced.value) ? qDebounced.value.trim() : undefined,
-      sortOrder: sortOrder.value === 'ASC' ? 'ASC' : undefined,
-      categoryId: categoryid.value ?? undefined,
-      perPage: DEFAULT_PAGE_SIZE === pagination.perPage ? undefined : pagination.perPage,
-      page: DEFAULT_PAGE === pagination.page ? undefined : pagination.page,
-    };
+  const querySchema = z.object({
+    q: z.string().optional(),
+    categoryId: z.coerce.number().optional(),
+    perPage: z.coerce.number().default(DEFAULT_PAGE_SIZE),
+    page: z.coerce.number().default(DEFAULT_PAGE),
   });
 
-  function fromQuery<T>(value: unknown, validate: (v: string) => boolean, fallback: T): T {
-    return typeof value === 'string' && validate(value) ? (value as T) : fallback;
-  }
+  const parsedQuery = computed(() => {
+    const result = querySchema.safeParse(route.query);
+    return result.success ? result.data : querySchema.parse({});
+  });
 
-  function isValidString(value: string): boolean {
-    return !!value && value.trim().length > 0;
-  }
+  const q = ref(parsedQuery.value.q ?? '');
+  const qDebounced = refDebounced(q, debounceDelay);
+  const categoryId = ref<number | null>(parsedQuery.value.categoryId ?? null);
 
-  function isValidSortOrder(value: string | null | undefined): boolean {
-    return value === 'ASC' || value === 'DESC';
-  }
+  const { pagination, ...paginationControls } = usePagination(
+    parsedQuery.value.perPage,
+    parsedQuery.value.page,
+  );
+
+  const requestFiltersParams = computed<LocationQueryRaw>(() => ({
+    q: qDebounced.value.trim() || undefined,
+    categoryId: categoryId.value ?? undefined,
+    page: pagination.page > DEFAULT_PAGE ? pagination.page : undefined,
+    perPage: pagination.page > DEFAULT_PAGE ? pagination.perPage : undefined,
+  }));
 
   const saveQuery = () => {
     router.replace({ query: requestFiltersParams.value as LocationQueryRaw });
@@ -47,24 +42,17 @@ export function useFilters(debounceDelay: number = 550) {
 
   const resetFilters = () => {
     q.value = '';
-    sortOrder.value = 'DESC';
-    categoryid.value = null;
-    firstPage();
+    categoryId.value = null;
+    paginationControls.firstPage();
   };
 
   return {
     q,
-    sortOrder,
-    categoryid,
+    categoryId,
     saveQuery,
     requestFiltersParams,
     pagination,
-    firstPage,
-    prevPage,
-    nextPage,
-    latestPage,
-    btnPage,
-    setPages,
     resetFilters,
+    ...paginationControls,
   };
 }
