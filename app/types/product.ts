@@ -14,6 +14,6 @@ export type Product = {
   description: string;
   price: number;
   category_id: number;
-  imageUrl: string;
+  image_url: string;
   created_at: string;
 };
