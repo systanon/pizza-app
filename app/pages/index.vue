@@ -3,7 +3,7 @@
     <Filters v-model:categoryId="categoryId" v-model:q="q" @reset-filters="resetFilters" />
     <v-row>
       <v-col v-for="product in products" :key="product.id" cols="12" sm="6" md="4">
-        <ProductCard :product="product" />
+        <ProductCard :product="product" @add-product="addProduct" />
       </v-col>
     </v-row>
     <v-empty-state
@@ -25,6 +25,7 @@
   </v-container>
 </template>
 <script lang="ts" setup>
+  import { useCartStore } from '~/store/cart';
   import { AppSuccess } from '~/types/app';
   import type { Product } from '~/types/product';
 
@@ -61,6 +62,16 @@
   const products = computed(() => data.value?.items ?? []);
   const total = computed(() => data.value?.total ?? 0);
   const totalPages = computed(() => data.value?.totalPages ?? 0);
+
+  const addProduct = (product: Product) => {
+    const cartStore = useCartStore();
+    cartStore.addItem({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      image_url: product.image_url,
+    });
+  };
 
   watch(
     requestFiltersParams,

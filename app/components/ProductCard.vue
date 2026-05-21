@@ -19,7 +19,7 @@
     <v-card-title>{{ product.name }}</v-card-title>
     <v-card-actions>
       <v-spacer />
-      <v-btn color="primary">Order Now</v-btn>
+      <v-btn color="primary" @click="emit('add-product', product)">Order Now</v-btn>
     </v-card-actions>
   </v-card>
 </template>
@@ -27,5 +27,9 @@
   import type { Product } from '~/types/product';
   defineProps<{
     product: Product;
+  }>();
+
+  const emit = defineEmits<{
+    (e: 'add-product', product: Product): void;
   }>();
 </script>
