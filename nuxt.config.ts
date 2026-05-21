@@ -2,7 +2,18 @@
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
-  modules: ['@pinia/nuxt', 'vuetify-nuxt-module', '@vueuse/nuxt'],
+  modules: [
+    '@pinia/nuxt',
+    'vuetify-nuxt-module',
+    '@vueuse/nuxt',
+    'pinia-plugin-persistedstate/nuxt',
+  ],
+  piniaPluginPersistedstate: {
+    storage: 'cookies',
+    cookieOptions: {
+      sameSite: 'lax',
+    },
+  },
   runtimeConfig: {
     apiInternal: process.env.GO_BACKEND_INTERNAL,
     public: {
