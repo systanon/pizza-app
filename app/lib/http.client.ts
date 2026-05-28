@@ -76,77 +76,43 @@ export class HTTPClient {
     return () => this.removeFrom(this.errorInterceptors, fn);
   }
 
-  async do<T>(
-    url: string,
-    options: NitroFetchOptions<'json'> = {},
-  ): Promise<AppSuccess<T> | AppError | AppRateLimitError | AppSilentError> {
-    let pipelineRetries = 0;
-
-    const exec = async (): Promise<
-      AppSuccess<T> | AppError | AppRateLimitError | AppSilentError
-    > => {
-      try {
-        await this.runRequestInterceptors(url, options);
-
-        const response = await this.rawFetch(url, options);
-
-        await this.runResponseInterceptors(response);
-
-        const data = response._data as SuccessResponse<T>;
-        return new AppSuccess<T>(data.data, response.headers, data.message);
-      } catch (error) {
-        if (pipelineRetries >= MAX_ERROR_PIPELINE_RETRIES) {
-          return this.handleError(error, url);
-        }
-
-        for (const interceptor of this.errorInterceptors) {
-          const shouldRetry = await interceptor(error, exec, options, { url });
-          if (shouldRetry) {
-            pipelineRetries += 1;
-            this.logger.warn(`Retrying request to ${url} (attempt ${pipelineRetries})`);
-            return exec();
-          }
-        }
-
-        return this.handleError(error, url);
-      }
-    };
-
-    return exec();
+  async do<T>(url: string, options: NitroFetchOptions<'json'> = {}) {
+    return this.execWithRetry<AppSuccess<T>>(url, options, (response) => {
+      const data = response._data as SuccessResponse<T>;
+      return new AppSuccess<T>(data.data, response.headers, data.message);
+    });
   }
 
-  async download(
+  async download(url: string, options: NitroFetchOptions<'json'> = {}) {
+    return this.execWithRetry<Blob>(url, { ...options, responseType: 'blob' }, (response) => {
+      return response._data as Blob;
+    });
+  }
+
+  private async execWithRetry<R>(
     url: string,
-    options: NitroFetchOptions<'json'> = {},
-  ): Promise<Blob | AppError | AppRateLimitError | AppSilentError> {
+    options: NitroFetchOptions<'json'>,
+    extractResult: (response: RawFetchResponse) => R,
+  ): Promise<R | AppError | AppRateLimitError | AppSilentError> {
     let pipelineRetries = 0;
 
-    const exec = async (): Promise<Blob | AppError | AppRateLimitError | AppSilentError> => {
+    const exec = async (): Promise<R | AppError | AppRateLimitError | AppSilentError> => {
       try {
         await this.runRequestInterceptors(url, options);
-
-        const response = await this.rawFetch(url, {
-          ...options,
-          responseType: 'blob',
-        });
-
+        const response = await this.rawFetch(url, options);
         await this.runResponseInterceptors(response);
-
-        return response._data as Blob;
+        return extractResult(response);
       } catch (error) {
         if (pipelineRetries >= MAX_ERROR_PIPELINE_RETRIES) {
           return this.handleError(error, url);
         }
-
         for (const interceptor of this.errorInterceptors) {
           const shouldRetry = await interceptor(error, exec, options, { url });
           if (shouldRetry) {
             pipelineRetries += 1;
-            this.logger.warn(`Retrying request to ${url} (attempt ${pipelineRetries})`);
             return exec();
           }
         }
-
         return this.handleError(error, url);
       }
     };
