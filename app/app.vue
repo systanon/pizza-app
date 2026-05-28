@@ -15,6 +15,6 @@
     if (response instanceof AppSuccess) {
       return response.data;
     }
-    throw response;
+    return [];
   });
 </script>
