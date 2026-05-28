@@ -25,7 +25,6 @@
   </v-container>
 </template>
 <script lang="ts" setup>
-  import { useCartStore } from '~/store/cart';
   import { AppSuccess } from '~/types/app';
   import type { Product } from '~/types/product';
 
@@ -33,7 +32,7 @@
     $app: { product },
   } = useNuxtApp();
 
-  const cartStore = useCartStore();
+  const { addItem } = useCart();
 
   const {
     requestFiltersParams,
@@ -65,13 +64,8 @@
   const total = computed(() => data.value?.total ?? 0);
   const totalPages = computed(() => data.value?.totalPages ?? 0);
 
-  const addProduct = (product: Product) => {
-    cartStore.addItem({
-      id: product.id,
-      name: product.name,
-      price: product.price,
-      image_url: product.image_url,
-    });
+  const addProduct = async (product: Product) => {
+    await addItem({ product_id: product.id, quantity: 1 });
   };
 
   watch(

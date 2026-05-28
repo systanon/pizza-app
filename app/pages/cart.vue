@@ -1,53 +1,22 @@
 <script setup lang="ts">
-  import { useCartStore } from '~/store/cart';
-  import { storeToRefs } from 'pinia';
+  const { items, totalCount, totalPrice, loading, fetchCart, updateItem, removeItem, clearCart } =
+    useCart();
 
-  export type PizzaSize = 'Small 10"' | 'Medium 12"' | 'Large 14"';
+  await useAsyncData('cart', fetchCart);
 
-  const store = useCartStore();
-  const { items, totalCount } = storeToRefs(store);
-
-  const promoCode = ref('');
-  const promoDiscount = ref(0);
-  const promoError = ref(false);
-  const promoApplied = ref(false);
-  const promoLabel = ref('');
-
-  const PROMOS: Record<string, number> = {
-    PIZZA10: 0.1,
-    FIRSTORDER: 0.15,
-  };
-
-  const subtotal = computed(() => items.value.reduce((s, i) => s + i.price * i.quantity, 0));
-  const savings = computed(() => Math.round(subtotal.value * promoDiscount.value * 100) / 100);
-  const deliveryFee = computed(() => (subtotal.value >= 20 ? 0 : 2.99));
-  const total = computed(() => subtotal.value - savings.value + deliveryFee.value);
-
-  function fmt(n: number) {
-    return '$' + n.toFixed(2);
+  function fmt(cents: number) {
+    return '$' + (cents / 100).toFixed(2);
   }
 
-  function applyPromo() {
-    const code = promoCode.value.trim().toUpperCase();
-    if (PROMOS[code]) {
-      promoDiscount.value = PROMOS[code];
-      promoApplied.value = true;
-      promoError.value = false;
-      promoLabel.value = `${code} applied — ${PROMOS[code] * 100}% off`;
-    } else {
-      promoDiscount.value = 0;
-      promoApplied.value = false;
-      promoError.value = true;
-      promoLabel.value = '';
-    }
-  }
+  const deliveryFee = computed(() => (totalPrice.value >= 2000 ? 0 : 299));
+  const grandTotal = computed(() => totalPrice.value + deliveryFee.value);
 </script>
 
 <template>
   <v-container class="py-8">
     <h1 class="text-h5 font-weight-medium mb-1">Your order</h1>
     <p class="text-body-2 text-medium-emphasis mb-6">
-      {{ totalCount }} {{ totalCount === 1 ? 'item' : 'items' }}
+      {{ totalCount }} {{ totalCount > 1 ? 'items' : 'item' }}
     </p>
 
     <v-row>
@@ -57,53 +26,90 @@
             <v-card-text>
               <div class="d-flex align-center gap-4">
                 <v-avatar size="56" rounded="lg" color="surface-variant">
-                  <v-img v-if="item.image_url" :src="item.image_url" :alt="item.name" cover />
+                  <v-img
+                    v-if="item.product_image"
+                    :src="item.product_image"
+                    :alt="item.product_name"
+                    cover
+                  />
                   <v-icon v-else icon="mdi-image-outline" />
                 </v-avatar>
-
                 <div class="flex-grow-1 min-width-0">
                   <p class="text-body-1 font-weight-medium text-truncate">
-                    {{ item.name }}
+                    {{ item.product_name }}
                   </p>
-                  <p class="text-body-2 text-medium-emphasis mb-1">
-                    {{ item.variant }}
+
+                  <p v-if="item.variant_name" class="text-body-2 text-medium-emphasis mb-1">
+                    {{ item.variant_name }}
+                    <span v-if="item.variant_unit" class="text-caption">
+                      · {{ item.variant_unit }}
+                    </span>
                   </p>
-                  <v-chip size="x-small" variant="outlined" class="mb-2">
-                    {{ item.size }}
-                  </v-chip>
+
+                  <div v-if="item.addons.length" class="d-flex flex-wrap gap-1 mb-2">
+                    <v-chip
+                      v-for="addon in item.addons"
+                      :key="addon.id"
+                      size="x-small"
+                      variant="tonal"
+                    >
+                      {{ addon.name }} +{{ fmt(addon.price) }}
+                    </v-chip>
+                  </div>
 
                   <div class="d-flex align-center gap-2">
                     <v-btn
                       icon="mdi-minus"
                       size="x-small"
                       variant="outlined"
-                      @click="store.updateQuantity(item.id, item.quantity - 1)"
+                      :disabled="loading"
+                      @click="updateItem(item.id, item.quantity - 1)"
                     />
                     <span class="text-body-2 font-weight-medium">{{ item.quantity }}</span>
                     <v-btn
                       icon="mdi-plus"
                       size="x-small"
                       variant="outlined"
-                      @click="store.updateQuantity(item.id, item.quantity + 1)"
+                      :disabled="loading"
+                      @click="updateItem(item.id, item.quantity + 1)"
                     />
                   </div>
                 </div>
 
                 <div class="d-flex flex-column align-end gap-2">
-                  <span class="text-body-1 font-weight-medium">
-                    {{ fmt(item.price * item.quantity) }}
+                  <span v-if="item.variant_price != null" class="text-body-1 font-weight-medium">
+                    {{
+                      fmt(
+                        (item.variant_price + item.addons.reduce((s, a) => s + a.price, 0)) *
+                          item.quantity,
+                      )
+                    }}
                   </span>
                   <v-btn
                     icon="mdi-delete-outline"
                     size="small"
                     variant="text"
                     color="error"
-                    @click="store.removeItem(item.id)"
+                    :disabled="loading"
+                    @click="removeItem(item.id)"
                   />
                 </div>
               </div>
             </v-card-text>
           </v-card>
+
+          <div class="d-flex justify-end mt-2">
+            <v-btn
+              variant="text"
+              color="error"
+              size="small"
+              prepend-icon="mdi-trash-can-outline"
+              :disabled="loading"
+              @click="clearCart()"
+            >
+              Clear cart
+            </v-btn>
+          </div>
         </template>
 
         <v-card v-else variant="outlined" class="py-12 text-center">
@@ -112,7 +118,6 @@
           <v-btn to="/" variant="tonal" class="mt-4">Browse menu</v-btn>
         </v-card>
       </v-col>
-
       <v-col cols="12" md="4">
         <v-card variant="outlined">
           <v-card-text>
@@ -132,7 +137,7 @@
 
             <div class="d-flex justify-space-between text-body-2 mb-2">
               <span class="text-medium-emphasis">Items ({{ totalCount }})</span>
-              <span>{{ fmt(subtotal) }}</span>
+              <span>{{ fmt(totalPrice) }}</span>
             </div>
             <div class="d-flex justify-space-between text-body-2 mb-2">
               <span class="text-medium-emphasis">Delivery fee</span>
@@ -140,45 +145,21 @@
                 {{ deliveryFee === 0 ? 'Free' : fmt(deliveryFee) }}
               </span>
             </div>
-            <div v-if="savings > 0" class="d-flex justify-space-between text-body-2 mb-2">
-              <span class="text-medium-emphasis">Promo discount</span>
-              <span class="text-success">–{{ fmt(savings) }}</span>
-            </div>
 
             <v-divider class="my-3" />
 
             <div class="d-flex justify-space-between text-body-1 font-weight-medium mb-4">
               <span>Total</span>
-              <span>{{ fmt(total) }}</span>
+              <span>{{ fmt(grandTotal) }}</span>
             </div>
 
-            <div class="d-flex gap-2 mb-2">
-              <v-text-field
-                v-model="promoCode"
-                placeholder="Promo code"
-                density="compact"
-                variant="outlined"
-                :error="promoError"
-                hide-details
-                @keyup.enter="applyPromo"
-              />
-              <v-btn variant="outlined" @click="applyPromo">Apply</v-btn>
-            </div>
-
-            <v-alert
-              v-if="promoApplied"
-              type="success"
-              density="compact"
-              variant="tonal"
-              class="mb-4"
+            <v-btn
+              block
+              color="primary"
+              size="large"
+              :disabled="!items.length || loading"
+              to="/checkout"
             >
-              {{ promoLabel }}
-            </v-alert>
-            <v-alert v-if="promoError" type="error" density="compact" variant="tonal" class="mb-4">
-              Invalid promo code
-            </v-alert>
-
-            <v-btn block color="primary" size="large" :disabled="!items.length" to="/checkout">
               <v-icon start icon="mdi-lock-outline" />
               Place order
             </v-btn>
