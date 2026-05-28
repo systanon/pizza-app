@@ -40,7 +40,7 @@
     <v-col cols="12" md="6">
       <v-text-field
         v-model="q"
-        label="Поиск"
+        label="Search"
         prepend-inner-icon="mdi-magnify"
         clearable
         hide-details
