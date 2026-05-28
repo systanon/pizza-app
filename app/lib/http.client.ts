@@ -33,7 +33,8 @@ export type ErrorInterceptor = (
   context: ErrorInterceptorContext,
 ) => Promise<boolean | void> | boolean | void;
 
-const MAX_ERROR_PIPELINE_RETRIES = 5;
+/** Maximum number of retry attempts triggered by error interceptors per request. */
+const MAX_RETRIES = 5;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null;
@@ -46,7 +47,11 @@ export function isFetchError(error: unknown): error is {
   if (!isRecord(error)) return false;
   const response = error.response;
   if (!isRecord(response)) return false;
-  return 'status' in response && 'headers' in response && '_data' in response;
+  return (
+    'status' in response && typeof response.status === 'number' &&
+    'headers' in response && response.headers instanceof Headers &&
+    '_data' in response
+  );
 }
 
 export class HTTPClient {
@@ -79,6 +84,9 @@ export class HTTPClient {
   async do<T>(url: string, options: NitroFetchOptions<'json'> = {}) {
     return this.execWithRetry<AppSuccess<T>>(url, options, (response) => {
       const data = response._data as SuccessResponse<T>;
+      if (!data || data.success !== true) {
+        throw new AppError('Unexpected response shape');
+      }
       return new AppSuccess<T>(data.data, response.headers, data.message);
     });
   }
@@ -103,7 +111,7 @@ export class HTTPClient {
         await this.runResponseInterceptors(response);
         return extractResult(response);
       } catch (error) {
-        if (pipelineRetries >= MAX_ERROR_PIPELINE_RETRIES) {
+        if (pipelineRetries >= MAX_RETRIES) {
           return this.handleError(error, url);
         }
         for (const interceptor of this.errorInterceptors) {
@@ -124,7 +132,7 @@ export class HTTPClient {
     url: string,
     options: NitroFetchOptions<'json'>,
   ): Promise<void> {
-    this.logger.log(`Making request to ${url} with options`, options);
+    this.logger.log(`Making request [${options.method ?? 'GET'}] ${url}`);
     for (const interceptor of this.requestInterceptors) {
       await interceptor(url, options);
     }
@@ -137,10 +145,8 @@ export class HTTPClient {
     }
   }
 
-  private rawFetch(url: string, options: unknown): Promise<RawFetchResponse<unknown>> {
-    return (
-      this.fetcher.raw as (url: string, options: unknown) => Promise<RawFetchResponse<unknown>>
-    )(url, options);
+  private rawFetch(url: string, options: NitroFetchOptions<string>): Promise<RawFetchResponse<unknown>> {
+    return this.fetcher.raw(url, options) as Promise<RawFetchResponse<unknown>>;
   }
 
   private removeFrom<T>(list: T[], fn: T): void {
