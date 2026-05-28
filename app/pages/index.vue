@@ -33,6 +33,8 @@
     $app: { product },
   } = useNuxtApp();
 
+  const cartStore = useCartStore();
+
   const {
     requestFiltersParams,
     saveQuery,
@@ -64,7 +66,6 @@
   const totalPages = computed(() => data.value?.totalPages ?? 0);
 
   const addProduct = (product: Product) => {
-    const cartStore = useCartStore();
     cartStore.addItem({
       id: product.id,
       name: product.name,
