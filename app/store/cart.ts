@@ -10,15 +10,12 @@ export const useCartStore = defineStore(
 
     const items = computed<CartItem[]>(() => cart.value?.items ?? []);
 
-    const totalCount = computed(() => items.value.reduce((sum, item) => sum + item.quantity, 0));
-
-    const totalPrice = computed(() =>
-      items.value.reduce((sum, item) => {
-        const variantPrice = item.variant_price ?? 0;
-        const addonsPrice = item.addons.reduce((s, a) => s + a.price, 0);
-        return sum + (variantPrice + addonsPrice) * item.quantity;
-      }, 0),
+    const totalCount = computed(() =>
+      items.value.reduce((sum, item) => sum + item.quantity, 0),
     );
+
+    /** Total price in cents, as calculated by the backend */
+    const totalPrice = computed(() => cart.value?.total ?? 0);
 
     return { cartId, cart, items, loading, totalCount, totalPrice };
   },

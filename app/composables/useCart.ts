@@ -68,7 +68,7 @@ export function useCart() {
     try {
       const result = await $app.cart.clearCart(cartId.value);
       if (result instanceof AppSuccess) {
-        cart.value = { id: cartId.value, items: [] };
+        cart.value = { id: cartId.value, items: [], total: 0 };
       }
       return result;
     } finally {

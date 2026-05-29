@@ -22,6 +22,8 @@ export type CartItem = {
 export type Cart = {
   id: string;
   items: CartItem[];
+  /** Total price in cents, calculated server-side */
+  total: number;
 };
 
 export type CreateCartItemRequest = {
