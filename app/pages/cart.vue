@@ -161,13 +161,7 @@
 </template>
 
 <script setup lang="ts">
-  const { items, totalCount, totalPrice, loading, fetchCart, updateItem, removeItem, clearCart } =
-    useCart();
-
-  await useAsyncData('cart', fetchCart);
+  const { items, totalCount, totalPrice, loading, deliveryFee, grandTotal, updateItem, removeItem, clearCart } = useCart();
 
   const { fmt } = useCurrency();
-
-  const deliveryFee = computed(() => (totalPrice.value >= 2000 ? 0 : 299));
-  const grandTotal = computed(() => totalPrice.value + deliveryFee.value);
 </script>

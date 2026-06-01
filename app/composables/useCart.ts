@@ -4,10 +4,21 @@ import { AppBaseError } from '~/types/app-errors';
 import type { CreateCartItemRequest } from '~/types/cart';
 import { useCartStore } from '~/store/cart';
 
+// TODO: delivery fee and grand total should be calculated by the backend and returned
+// as part of the cart/order response (e.g. delivery_fee, grand_total fields).
+// This would centralise pricing logic and support promotions, delivery zones, etc.
+const FREE_DELIVERY_THRESHOLD = 2000; // cents
+const DELIVERY_FEE = 299; // cents
+
 export function useCart() {
   const store = useCartStore();
   const { cartId, cart, items, loading, totalCount, totalPrice } = storeToRefs(store);
   const { $app } = useNuxtApp();
+
+  const deliveryFee = computed(() =>
+    totalPrice.value >= FREE_DELIVERY_THRESHOLD ? 0 : DELIVERY_FEE,
+  );
+  const grandTotal = computed(() => totalPrice.value + deliveryFee.value);
 
   async function fetchCart() {
     if (!cartId.value) return;
@@ -83,6 +94,8 @@ export function useCart() {
     loading,
     totalCount,
     totalPrice,
+    deliveryFee,
+    grandTotal,
     fetchCart,
     addItem,
     updateItem,
