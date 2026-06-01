@@ -1,6 +1,7 @@
 import type { ProductApplication } from '~/application/product.application';
 import type { CategoryApplication } from '~/application/category.application';
 import type { CartApplication } from '~/application/cart.application';
+import type { AddonApplication } from '~/application/addon.application';
 import type { HTTPClient } from '~/lib/http.client';
 
 declare module '#app' {
@@ -10,6 +11,7 @@ declare module '#app' {
       product: ProductApplication;
       category: CategoryApplication;
       cart: CartApplication;
+      addon: AddonApplication;
     };
   }
 }
@@ -21,6 +23,7 @@ declare module 'vue' {
       product: ProductApplication;
       category: CategoryApplication;
       cart: CartApplication;
+      addon: AddonApplication;
     };
   }
 }
