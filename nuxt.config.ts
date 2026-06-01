@@ -7,6 +7,7 @@ export default defineNuxtConfig({
     'vuetify-nuxt-module',
     '@vueuse/nuxt',
     'pinia-plugin-persistedstate/nuxt',
+    '@nuxt/eslint',
   ],
   piniaPluginPersistedstate: {
     storage: 'cookies',
