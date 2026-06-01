@@ -10,10 +10,26 @@ export type ProductQuery = {
 
 export type Product = {
   id: number;
+  category_id: number;
   name: string;
   description: string;
-  price: number;
-  category_id: number;
   image_url: string;
-  created_at: string;
+};
+
+export type Variant = {
+  id: number;
+  name: string;
+  unit: string;
+  /** Price in cents */
+  price: number;
+  value: number;
+};
+
+export type ProductDetail = {
+  id: number;
+  category_id: number;
+  name: string;
+  description: string;
+  image_url: string;
+  variants?: Variant[];
 };

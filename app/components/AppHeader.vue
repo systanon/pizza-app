@@ -1,9 +1,5 @@
 <script setup lang="ts">
-  import { useCartStore } from '~/store/cart';
-  import { storeToRefs } from 'pinia';
-
-  const store = useCartStore();
-  const { totalCount } = storeToRefs(store);
+  const { totalCount } = useCart();
 
   const address = ref('123 Main St');
 </script>

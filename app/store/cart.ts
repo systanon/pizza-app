@@ -1,53 +1,27 @@
 import { defineStore } from 'pinia';
-
-export interface CartItem {
-  id: number;
-  name: string;
-  price: number;
-  quantity: number;
-  variant?: string;
-  image_url: string;
-  size?: string;
-}
+import type { Cart, CartItem } from '~/types/cart';
 
 export const useCartStore = defineStore(
   'cart',
   () => {
-    const items = ref<CartItem[]>([]);
+    const cartId = ref<string | null>(null);
+    const cart = ref<Cart | null>(null);
+    const loading = ref(false);
 
-    const totalCount = computed(() => items.value.reduce((sum, item) => sum + item.quantity, 0));
+    const items = computed<CartItem[]>(() => cart.value?.items ?? []);
 
-    const totalPrice = computed(() =>
-      items.value.reduce((sum, item) => sum + item.price * item.quantity, 0),
+    const totalCount = computed(() =>
+      items.value.reduce((sum, item) => sum + item.quantity, 0),
     );
 
-    function addItem(product: Omit<CartItem, 'quantity'>, qty = 1) {
-      const existing = items.value.find((i) => i.id === product.id);
-      if (existing) {
-        existing.quantity += qty;
-      } else {
-        items.value.push({ ...product, quantity: qty });
-      }
-    }
+    /** Total price in cents, as calculated by the backend */
+    const totalPrice = computed(() => cart.value?.total ?? 0);
 
-    function removeItem(id: number) {
-      items.value = items.value.filter((i) => i.id !== id);
-    }
-
-    function updateQuantity(id: number, quantity: number) {
-      const item = items.value.find((i) => i.id === id);
-      if (item) {
-        quantity > 0 ? (item.quantity = quantity) : removeItem(id);
-      }
-    }
-
-    function clear() {
-      items.value = [];
-    }
-
-    return { items, totalCount, totalPrice, addItem, removeItem, updateQuantity, clear };
+    return { cartId, cart, items, loading, totalCount, totalPrice };
   },
   {
-    persist: true,
+    persist: {
+      pick: ['cartId'],
+    },
   },
 );

@@ -3,7 +3,7 @@
     <Filters v-model:categoryId="categoryId" v-model:q="q" @reset-filters="resetFilters" />
     <v-row>
       <v-col v-for="product in products" :key="product.id" cols="12" sm="6" md="4">
-        <ProductCard :product="product" @add-product="addProduct" />
+        <ProductCard :product="product" />
       </v-col>
     </v-row>
     <v-empty-state
@@ -24,16 +24,14 @@
     </div>
   </v-container>
 </template>
+
 <script lang="ts" setup>
-  import { useCartStore } from '~/store/cart';
   import { AppSuccess } from '~/types/app';
   import type { Product } from '~/types/product';
 
   const {
     $app: { product },
   } = useNuxtApp();
-
-  const cartStore = useCartStore();
 
   const {
     requestFiltersParams,
@@ -61,26 +59,10 @@
     },
     { watch: [requestFiltersParams] },
   );
+
   const products = computed(() => data.value?.items ?? []);
-  const total = computed(() => data.value?.total ?? 0);
   const totalPages = computed(() => data.value?.totalPages ?? 0);
 
-  const addProduct = (product: Product) => {
-    cartStore.addItem({
-      id: product.id,
-      name: product.name,
-      price: product.price,
-      image_url: product.image_url,
-    });
-  };
-
-  watch(
-    requestFiltersParams,
-    () => {
-      saveQuery();
-    },
-    { deep: true },
-  );
-
+  watch(requestFiltersParams, () => saveQuery(), { deep: true });
   watch(totalPages, (pages) => setPages(pages), { immediate: true });
 </script>
