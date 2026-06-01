@@ -1,9 +1,3 @@
-<script setup lang="ts">
-  const { totalCount } = useCart();
-
-  const address = ref('123 Main St');
-</script>
-
 <template>
   <v-app-bar flat border="b">
     <v-app-bar-title>
@@ -48,3 +42,9 @@
     </v-avatar>
   </v-app-bar>
 </template>
+
+<script setup lang="ts">
+  const { totalCount } = useCart();
+
+  const address = ref('123 Main St');
+</script>

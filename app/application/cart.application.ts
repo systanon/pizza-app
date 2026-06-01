@@ -1,6 +1,6 @@
 import type { CartService } from '~/service/cart.service';
 import { AppSuccess } from '~/types/app';
-import { AppBaseError } from '~/types/app-errors';
+import type { AppBaseError } from '~/types/app-errors';
 import type { Cart, CreateCartItemRequest } from '~/types/cart';
 
 export class CartApplication {

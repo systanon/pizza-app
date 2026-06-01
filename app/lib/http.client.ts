@@ -31,7 +31,7 @@ export type ErrorInterceptor = (
   retry: () => Promise<unknown>,
   options: NitroFetchOptions<'json'>,
   context: ErrorInterceptorContext,
-) => Promise<boolean | void> | boolean | void;
+) => Promise<boolean | undefined> | boolean | undefined;
 
 /** Maximum number of retry attempts triggered by error interceptors per request. */
 const MAX_RETRIES = 5;
@@ -48,8 +48,10 @@ export function isFetchError(error: unknown): error is {
   const response = error.response;
   if (!isRecord(response)) return false;
   return (
-    'status' in response && typeof response.status === 'number' &&
-    'headers' in response && response.headers instanceof Headers &&
+    'status' in response &&
+    typeof response.status === 'number' &&
+    'headers' in response &&
+    response.headers instanceof Headers &&
     '_data' in response
   );
 }
@@ -145,7 +147,10 @@ export class HTTPClient {
     }
   }
 
-  private rawFetch(url: string, options: NitroFetchOptions<string>): Promise<RawFetchResponse<unknown>> {
+  private rawFetch(
+    url: string,
+    options: NitroFetchOptions<string>,
+  ): Promise<RawFetchResponse<unknown>> {
     return this.fetcher.raw(url, options) as Promise<RawFetchResponse<unknown>>;
   }
 

@@ -1,15 +1,3 @@
-<script setup lang="ts">
-  const { items, totalCount, totalPrice, loading, fetchCart, updateItem, removeItem, clearCart } =
-    useCart();
-
-  await useAsyncData('cart', fetchCart);
-
-  const { fmt } = useCurrency();
-
-  const deliveryFee = computed(() => (totalPrice.value >= 2000 ? 0 : 299));
-  const grandTotal = computed(() => totalPrice.value + deliveryFee.value);
-</script>
-
 <template>
   <v-container class="py-8">
     <h1 class="text-h5 font-weight-medium mb-1">Your order</h1>
@@ -171,3 +159,15 @@
     </v-row>
   </v-container>
 </template>
+
+<script setup lang="ts">
+  const { items, totalCount, totalPrice, loading, fetchCart, updateItem, removeItem, clearCart } =
+    useCart();
+
+  await useAsyncData('cart', fetchCart);
+
+  const { fmt } = useCurrency();
+
+  const deliveryFee = computed(() => (totalPrice.value >= 2000 ? 0 : 299));
+  const grandTotal = computed(() => totalPrice.value + deliveryFee.value);
+</script>

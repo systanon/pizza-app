@@ -1,7 +1,7 @@
 <template>
   <v-chip-group
-    :model-value="categoryId"
     v-if="!mobile"
+    :model-value="categoryId"
     column
     @update:model-value="categoryId = $event ? Number($event) : null"
   >

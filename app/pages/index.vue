@@ -1,6 +1,6 @@
 <template>
   <v-container>
-    <Filters v-model:categoryId="categoryId" v-model:q="q" @reset-filters="resetFilters" />
+    <ProductFilters v-model:category-id="categoryId" v-model:q="q" @reset-filters="resetFilters" />
     <v-row>
       <v-col v-for="product in products" :key="product.id" cols="12" sm="6" md="4">
         <ProductCard :product="product" />
@@ -30,7 +30,7 @@
   import type { Product } from '~/types/product';
 
   const {
-    $app: { product },
+    $app: { product: productApp },
   } = useNuxtApp();
 
   const {
@@ -47,7 +47,7 @@
   const { data } = await useAsyncData(
     'products',
     async () => {
-      const response = await product.getAll(requestFiltersParams.value);
+      const response = await productApp.getAll(requestFiltersParams.value);
       if (response instanceof AppSuccess) {
         return {
           items: response.data as Product[],

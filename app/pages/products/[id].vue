@@ -1,75 +1,3 @@
-<script setup lang="ts">
-  import { AppSuccess } from '~/types/app';
-  import { AppError } from '~/types/app-errors';
-  import type { Variant } from '~/types/product';
-  import type { Addon } from '~/types/addon';
-
-  const route = useRoute();
-  const productId = computed(() => Number(route.params.id));
-
-  const {
-    $app: { product: productApp, addon: addonApp },
-  } = useNuxtApp();
-
-  const { addItem, loading: cartLoading } = useCart();
-
-  const { fmt } = useCurrency();
-
-  const { data: product, error: productError } = await useAsyncData(
-    `product-${productId.value}`,
-    async () => {
-      const result = await productApp.getById(productId.value);
-      if (result instanceof AppSuccess) return result.data;
-      throw result;
-    },
-  );
-
-  const { data: addons } = await useAsyncData(`addons-${product.value?.category_id}`, async () => {
-    if (!product.value?.category_id) return [] as Addon[];
-    const result = await addonApp.getByCategoryId(product.value.category_id);
-    if (result instanceof AppSuccess) return result.data;
-    return [] as Addon[];
-  });
-
-  const hasVariants = computed(() => !!product.value?.variants?.length);
-
-  const selectedVariant = ref<Variant | null>(product.value?.variants?.[0] ?? null);
-  const selectedAddonIds = ref<number[]>([]);
-  const quantity = ref(1);
-  const cartError = ref<string | null>(null);
-
-  const selectedAddons = computed(() =>
-    (addons.value ?? []).filter((a) => selectedAddonIds.value.includes(a.id)),
-  );
-
-  const lineTotal = computed(() => {
-    const variantPrice = selectedVariant.value?.price ?? 0;
-    const addonsPrice = selectedAddons.value.reduce((s, a) => s + a.price, 0);
-    return (variantPrice + addonsPrice) * quantity.value;
-  });
-
-  const canAddToCart = computed(() => !hasVariants.value || selectedVariant.value !== null);
-
-  async function handleAddToCart() {
-    if (!canAddToCart.value) return;
-    cartError.value = null;
-
-    const result = await addItem({
-      product_id: productId.value,
-      variant_id: selectedVariant.value?.id ?? undefined,
-      quantity: quantity.value,
-      addon_ids: selectedAddonIds.value.length ? selectedAddonIds.value : undefined,
-    });
-
-    if (result instanceof AppError) {
-      cartError.value = result.message;
-      return;
-    }
-
-    navigateTo('/cart');
-  }
-</script>
-
 <template>
   <v-container class="py-8" max-width="800">
     <v-alert v-if="productError" type="error" variant="tonal" class="mb-6">
@@ -189,3 +117,75 @@
     </template>
   </v-container>
 </template>
+
+<script setup lang="ts">
+  import { AppSuccess } from '~/types/app';
+  import { AppError } from '~/types/app-errors';
+  import type { Variant } from '~/types/product';
+  import type { Addon } from '~/types/addon';
+
+  const route = useRoute();
+  const productId = computed(() => Number(route.params.id));
+
+  const {
+    $app: { product: productApp, addon: addonApp },
+  } = useNuxtApp();
+
+  const { addItem, loading: cartLoading } = useCart();
+
+  const { fmt } = useCurrency();
+
+  const { data: product, error: productError } = await useAsyncData(
+    `product-${productId.value}`,
+    async () => {
+      const result = await productApp.getById(productId.value);
+      if (result instanceof AppSuccess) return result.data;
+      throw result;
+    },
+  );
+
+  const { data: addons } = await useAsyncData(`addons-${product.value?.category_id}`, async () => {
+    if (!product.value?.category_id) return [] as Addon[];
+    const result = await addonApp.getByCategoryId(product.value.category_id);
+    if (result instanceof AppSuccess) return result.data;
+    return [] as Addon[];
+  });
+
+  const hasVariants = computed(() => !!product.value?.variants?.length);
+
+  const selectedVariant = ref<Variant | null>(product.value?.variants?.[0] ?? null);
+  const selectedAddonIds = ref<number[]>([]);
+  const quantity = ref(1);
+  const cartError = ref<string | null>(null);
+
+  const selectedAddons = computed(() =>
+    (addons.value ?? []).filter((a) => selectedAddonIds.value.includes(a.id)),
+  );
+
+  const lineTotal = computed(() => {
+    const variantPrice = selectedVariant.value?.price ?? 0;
+    const addonsPrice = selectedAddons.value.reduce((s, a) => s + a.price, 0);
+    return (variantPrice + addonsPrice) * quantity.value;
+  });
+
+  const canAddToCart = computed(() => !hasVariants.value || selectedVariant.value !== null);
+
+  async function handleAddToCart() {
+    if (!canAddToCart.value) return;
+    cartError.value = null;
+
+    const result = await addItem({
+      product_id: productId.value,
+      variant_id: selectedVariant.value?.id ?? undefined,
+      quantity: quantity.value,
+      addon_ids: selectedAddonIds.value.length ? selectedAddonIds.value : undefined,
+    });
+
+    if (result instanceof AppError) {
+      cartError.value = result.message;
+      return;
+    }
+
+    navigateTo('/cart');
+  }
+</script>
