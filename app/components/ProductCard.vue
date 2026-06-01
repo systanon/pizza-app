@@ -1,5 +1,5 @@
 <template>
-  <v-card :to="`/products/${product.id}`">
+  <v-card>
     <v-img :src="product.image_url" :alt="product.name" height="220" cover>
       <template #placeholder>
         <div class="d-flex align-center justify-center fill-height">
@@ -23,9 +23,7 @@
 
     <v-card-actions>
       <v-spacer />
-      <v-btn color="primary" variant="tonal" :to="`/products/${product.id}`">
-        Order Now
-      </v-btn>
+      <v-btn color="primary" variant="tonal" :to="`/products/${product.id}`"> Order Now </v-btn>
     </v-card-actions>
   </v-card>
 </template>
