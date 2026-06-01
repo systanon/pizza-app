@@ -75,6 +75,10 @@
                 </div>
 
                 <div class="d-flex flex-column align-end gap-2">
+                  <!-- TODO: item price is calculated client-side (variant_price + addons) * quantity.
+                       If the backend ever applies per-item discounts or promotions this will diverge
+                       from the server total. Consider adding an `item_total` field to CartItem so the
+                       backend is the single source of truth for all price values. -->
                   <span v-if="item.variant_price != null" class="text-body-1 font-weight-medium">
                     {{
                       fmt(
