@@ -53,14 +53,13 @@
 </template>
 
 <script setup lang="ts">
+  const emit = defineEmits<{
+    (e: 'resetFilters'): void;
+  }>();
   const categoryId = defineModel<number | null>('categoryId', { default: null });
   const q = defineModel<string>('q', { default: '' });
   const { data: categories } = useCategories();
   const { mobile } = useDisplay();
 
   const expanded = ref(false);
-
-  const emit = defineEmits<{
-    (e: 'resetFilters'): void;
-  }>();
 </script>

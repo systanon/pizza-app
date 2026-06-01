@@ -8,5 +8,11 @@ export default withNuxt({
         order: ['template', 'script', 'style'],
       },
     ],
+    'vue/define-macros-order': [
+      'error',
+      {
+        order: ['defineOptions', 'defineProps', 'defineEmits', 'defineModel', 'defineSlots'],
+      },
+    ],
   },
 });
