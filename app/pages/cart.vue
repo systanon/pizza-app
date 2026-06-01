@@ -4,9 +4,7 @@
 
   await useAsyncData('cart', fetchCart);
 
-  function fmt(cents: number) {
-    return '$' + (cents / 100).toFixed(2);
-  }
+  const { fmt } = useCurrency();
 
   const deliveryFee = computed(() => (totalPrice.value >= 2000 ? 0 : 299));
   const grandTotal = computed(() => totalPrice.value + deliveryFee.value);
