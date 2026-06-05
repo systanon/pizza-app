@@ -12,6 +12,7 @@ declare module '#app' {
       category: CategoryApplication;
       cart: CartApplication;
       addon: AddonApplication;
+      order: OrderApplication;
     };
   }
 }
@@ -24,6 +25,7 @@ declare module 'vue' {
       category: CategoryApplication;
       cart: CartApplication;
       addon: AddonApplication;
+      order: OrderApplication;
     };
   }
 }
