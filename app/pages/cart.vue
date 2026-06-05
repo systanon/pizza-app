@@ -63,10 +63,10 @@
                 </div>
 
                 <div class="d-flex flex-column align-end gap-2">
-                  <!-- TODO: item price is calculated client-side (variant_price + addons) * quantity.
-                       If the backend ever applies per-item discounts or promotions this will diverge
-                       from the server total. Consider adding an `item_total` field to CartItem so the
-                       backend is the single source of truth for all price values. -->
+                  <!-- NOTE: item price is calculated client-side as (variant_price + addons) * quantity.
+                       This is intentional — CartItem does not carry item_total because cart prices
+                       are always live (joined from product_variant_prices at query time on the backend).
+                       The backend returns cart.total as the authoritative sum for the whole cart. -->
                   <span v-if="item.variant_price != null" class="text-body-1 font-weight-medium">
                     {{
                       fmt(

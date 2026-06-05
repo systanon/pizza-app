@@ -31,6 +31,10 @@
                 + {{ item.addons.map((a) => a.name).join(', ') }}
               </div>
             </div>
+            <!-- NOTE: item price is calculated client-side as (variant_price + addons) * quantity.
+                 This is intentional — CartItem does not carry item_total because cart prices
+                 are always live (joined from product_variant_prices at query time on the backend).
+                 The backend returns cart.total as the authoritative sum for the whole cart. -->
             <span v-if="item.variant_price != null" class="text-body-2 ml-4 text-no-wrap">
               {{
                 fmt(
