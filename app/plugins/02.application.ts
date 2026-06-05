@@ -6,6 +6,8 @@ import { CartService } from '~/service/cart.service';
 import { CartApplication } from '~/application/cart.application';
 import { AddonService } from '~/service/addon.service';
 import { AddonApplication } from '~/application/addon.application';
+import { OrderApplication } from '~/application/order.application';
+import { OrderService } from '~/service/order.service';
 
 type AppProvide = {
   provide: {
@@ -14,9 +16,11 @@ type AppProvide = {
       category: CategoryApplication;
       cart: CartApplication;
       addon: AddonApplication;
+      order: OrderApplication;
     };
   };
 };
+
 export default defineNuxtPlugin({
   name: 'application',
   setup(): AppProvide {
@@ -26,6 +30,7 @@ export default defineNuxtPlugin({
     const categoryApplication = new CategoryApplication(new CategoryService($httpClient));
     const cartApplication = new CartApplication(new CartService($httpClient));
     const addonApplication = new AddonApplication(new AddonService($httpClient));
+    const orderApplication = new OrderApplication(new OrderService($httpClient));
 
     return {
       provide: {
@@ -34,6 +39,7 @@ export default defineNuxtPlugin({
           category: categoryApplication,
           cart: cartApplication,
           addon: addonApplication,
+          order: orderApplication,
         },
       },
     };
