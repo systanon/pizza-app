@@ -1,0 +1,16 @@
+services:
+  frontend:
+    build:
+      context: .
+      args:
+        APP_PORT: ${APP_PORT:-3000}
+    restart: unless-stopped
+    ports:
+      - "${APP_PORT:-3000}:3000"
+    env_file: .env
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    external: true
