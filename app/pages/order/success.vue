@@ -17,13 +17,11 @@
 <script setup lang="ts">
   const { cartId, cart } = useCart();
 
-  // Stripe appends ?session_id=... to the success URL — we use it to show the order id
-  // The order_id is stored in Stripe session metadata and retrieved via the backend
+  // TODO: once user authentication is implemented on the backend, use the Stripe
+  // session_id from the URL query (?session_id=...) to fetch the order and display
+  // the order id. The order_id will be retrievable via the authenticated user's order history.
   const orderId = ref<number | null>(null);
 
-  onMounted(async () => {
-    // Clear cart on successful payment
-    cartId.value = null;
-    cart.value = null;
-  });
+  cartId.value = null;
+  cart.value = null;
 </script>
