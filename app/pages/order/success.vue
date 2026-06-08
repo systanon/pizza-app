@@ -15,13 +15,18 @@
 </template>
 
 <script setup lang="ts">
-  const { cartId, cart } = useCart();
-
   // TODO: once user authentication is implemented on the backend, use the Stripe
   // session_id from the URL query (?session_id=...) to fetch the order and display
   // the order id. The order_id will be retrievable via the authenticated user's order history.
   const orderId = ref<number | null>(null);
 
-  cartId.value = null;
-  cart.value = null;
+  // Middleware runs before app.vue fetches the cart, so cartId is already null
+  // when SSR tries to load the cart — prevents hydration mismatch and stale cart.
+  definePageMeta({
+    middleware: () => {
+      const { cartId, cart } = useCart();
+      cartId.value = null;
+      cart.value = null;
+    },
+  });
 </script>
