@@ -55,7 +55,9 @@
                 size="small"
               >
                 {{ variant.name }}
-                <span class="text-caption ml-1 text-medium-emphasis">{{ variant.unit }}</span>
+                <span class="text-caption ml-1 text-medium-emphasis"
+                  >{{ variant.value }}{{ variant.unit }}</span
+                >
                 <span class="ml-2">{{ fmt(variant.price) }}</span>
               </v-btn>
             </v-btn-toggle>
