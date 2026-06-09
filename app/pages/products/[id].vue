@@ -46,7 +46,7 @@
               color="primary"
               variant="outlined"
               divided
-              class="mb-6 flex-wrap"
+              class="mb-6 d-flex flex-wrap gap-2"
             >
               <v-btn
                 v-for="variant in product.variants"
