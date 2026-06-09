@@ -47,6 +47,7 @@
               variant="outlined"
               divided
               class="mb-6 d-flex flex-wrap gap-2"
+              style="overflow: visible; height: auto"
             >
               <v-btn
                 v-for="variant in product.variants"
